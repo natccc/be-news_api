@@ -25,8 +25,10 @@ describe("/api/topics", () => {
         expect(body.topics.length).toBe(3);
         const { topics } = body;
         topics.forEach((topic) => {
-          expect(topic.hasOwnProperty("slug")).toBe(true);
-          expect(topic.hasOwnProperty("description")).toBe(true);
+            expect(topic).toMatchObject({
+                slug: expect.any(String),
+                description: expect.any(String)
+            })
         });
       });
   });
@@ -89,15 +91,17 @@ describe("/api/articles", () => {
         console.log(articles)
         expect(articles.length).toBe(13);
         articles.forEach((article) => {
-          expect(article.hasOwnProperty("title")).toBe(true);
-          expect(article.hasOwnProperty("topic")).toBe(true);
-          expect(article.hasOwnProperty("author")).toBe(true);
-          expect(article.hasOwnProperty("body")).toBe(true);
-          expect(article.hasOwnProperty("created_at")).toBe(true);
-          expect(article.hasOwnProperty("votes")).toBe(true);
-          expect(article.hasOwnProperty("article_img_url")).toBe(true);
-          expect(article.hasOwnProperty("article_id")).toBe(true);
-          expect(article.hasOwnProperty("comment_count")).toBe(true);
+        expect(article).toMatchObject({
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            article_id: expect.any(Number),
+            comment_count: expect.any(String),
+        })
         });
       });
   });
