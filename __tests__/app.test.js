@@ -3,7 +3,6 @@ const request = require("supertest");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
-const fs = require("fs");
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
@@ -35,12 +34,12 @@ describe("/api/topics", () => {
 
 describe("/api", () => {
   it("GET 200: responds with a JSON representation of all the endpoints in this API ", () => {
-    const expected = JSON.parse(fs.readFileSync("endpoints.json", "utf8"));
+    // const expected = JSON.parse(fs.readFileSync("endpoints.json", "utf8"));
     return request(app)
       .get("/api")
       .expect(200)
-      .then(({ body }) => {
-        expect(body).toEqual(expected);
+      .then(({ body:{endpoints} }) => {
+        expect(endpoints).toEqual(require("../endpoints.json"));
       });
   });
 });
@@ -71,7 +70,7 @@ describe("/api/articles/:article_id", () => {
         expect(body.message).toBe("bad request");
       });
   });
-  it.only("GET 404: responds with an error if enters a non-existing id", () => {
+  it("GET 404: responds with an error if enters a non-existing id", () => {
     return request(app)
       .get("/api/articles/100")
       .expect(404)

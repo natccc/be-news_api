@@ -11,7 +11,7 @@ exports.getTopics = (req, res, next) => {
 exports.getEndpoints = (req, res, next) => {
   return fetchEndpoints()
     .then((endpoints) => {
-      res.status(200).send(JSON.parse(endpoints));
+      res.status(200).send({endpoints:JSON.parse(endpoints)});
     })
     .catch(next);
 };
