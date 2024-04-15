@@ -3,6 +3,7 @@ const request = require("supertest");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
+
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
@@ -25,8 +26,10 @@ describe("/api/topics", () => {
         expect(body.topics.length).toBe(3);
         const { topics } = body;
         topics.forEach((topic) => {
-          expect(topic.hasOwnProperty("slug")).toBe(true);
-          expect(topic.hasOwnProperty("description")).toBe(true);
+            expect(topic).toMatchObject({
+                slug: expect.any(String),
+                description: expect.any(String)
+            })
         });
       });
   });
@@ -86,19 +89,59 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body: { articles } }) => {
-        console.log(articles)
+        expect(articles).toBeSortedBy('created_at',{descending: true})
         expect(articles.length).toBe(13);
         articles.forEach((article) => {
-          expect(article.hasOwnProperty("title")).toBe(true);
-          expect(article.hasOwnProperty("topic")).toBe(true);
-          expect(article.hasOwnProperty("author")).toBe(true);
-          expect(article.hasOwnProperty("body")).toBe(true);
-          expect(article.hasOwnProperty("created_at")).toBe(true);
-          expect(article.hasOwnProperty("votes")).toBe(true);
-          expect(article.hasOwnProperty("article_img_url")).toBe(true);
-          expect(article.hasOwnProperty("article_id")).toBe(true);
-          expect(article.hasOwnProperty("comment_count")).toBe(true);
+        expect(article).toMatchObject({
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            article_id: expect.any(Number),
+            comment_count: expect.any(String),
+        })
         });
       });
   });
 });
+
+describe('/api/articles/:article_id/comments', () => {
+    it('GET 200: responds with an array of comments for the given article_id', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+             expect(comments.length).toBe(11);
+             expect(comments).toBeSortedBy('created_at',{descending: true})
+             comments.forEach((comment) => {
+                 expect(comment).toMatchObject({
+                     comment_id: expect.any(Number),
+                     body: expect.any(String),
+                     votes: expect.any(Number),
+                     author: expect.any(String),
+                     created_at: expect.any(String),
+                     article_id: expect.any(Number),
+                 })
+             });
+    });
+});
+it('GET 404: returns error for non existing id', () => {
+    return request(app)
+    .get('/api/articles/100/comments')
+    .expect(404)
+    .then(({ body }) => {
+         expect(body.message).toBe("not found");
+     });
+});
+it('GET 400: returns error for bad id', () => {
+    return request(app)
+    .get('/api/articles/dog/comments')
+    .expect(400)
+    .then(({ body }) => {
+         expect(body.message).toBe("bad request");
+     });
+})
+})
