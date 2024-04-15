@@ -1,11 +1,14 @@
 const express = require('express')
 const app = express()
-const {getTopics, getEndpoints, getArticleById, getArticles} = require('./controllers/topics-controllers')
+const {getTopics,} = require('./controllers/topics-controllers')
+const{getArticleById, getArticles, getComments}=require('./controllers/articles-controllers')
+const{getEndpoints}= require('./controllers/api-controllers')
 
 app.get('/api', getEndpoints)
 app.get('/api/topics', getTopics)
 app.get('/api/articles/:article_id', getArticleById)
 app.get('/api/articles', getArticles)
+app.get('/api/articles/:article_id/comments', getComments)
 
 //error handling by express
 app.all('*',(req,res,next)=>{

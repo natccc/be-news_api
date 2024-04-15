@@ -3,6 +3,7 @@ const request = require("supertest");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
+
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
@@ -88,7 +89,7 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body: { articles } }) => {
-        console.log(articles)
+        expect(articles).toBeSortedBy('created_at',{descending: true})
         expect(articles.length).toBe(13);
         articles.forEach((article) => {
         expect(article).toMatchObject({
@@ -106,3 +107,41 @@ describe("/api/articles", () => {
       });
   });
 });
+
+describe('/api/articles/:article_id/comments', () => {
+    it('GET 200: responds with an array of comments for the given article_id', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+             expect(comments.length).toBe(11);
+             expect(comments).toBeSortedBy('created_at',{descending: true})
+             comments.forEach((comment) => {
+                 expect(comment).toMatchObject({
+                     comment_id: expect.any(Number),
+                     body: expect.any(String),
+                     votes: expect.any(Number),
+                     author: expect.any(String),
+                     created_at: expect.any(String),
+                     article_id: expect.any(Number),
+                 })
+             });
+    });
+});
+it('GET 404: returns error for non existing id', () => {
+    return request(app)
+    .get('/api/articles/100/comments')
+    .expect(404)
+    .then(({ body }) => {
+         expect(body.message).toBe("not found");
+     });
+});
+it('GET 400: returns error for bad id', () => {
+    return request(app)
+    .get('/api/articles/dog/comments')
+    .expect(400)
+    .then(({ body }) => {
+         expect(body.message).toBe("bad request");
+     });
+})
+})
