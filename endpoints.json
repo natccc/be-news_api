@@ -62,7 +62,10 @@
   "POST /api/articles/:article_id/comments": {
     "description": "add a comment for an article",
     "queries": [],
-    "exampleBody": {"useranme": "butter_bridge", "body": "This is a test comment"},
+    "exampleBody": {
+      "useranme": "butter_bridge",
+      "body": "This is a test comment"
+    },
     "exampleResponse": {
       "comment": {
         "comment_id": 19,
@@ -71,6 +74,23 @@
         "author": "butter_bridge",
         "votes": 0,
         "created_at": "2024-04-15T20:25:22.313Z"
+      }
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "update an article",
+    "queries": [],
+    "exampleBody": { "inc_votes": 100 },
+    "exampleResponse": {
+      "article": {
+        "article_id": 1,
+        "title": "Living in the shadow of a great man",
+        "topic": "mitch",
+        "author": "butter_bridge",
+        "body": "I find this existence challenging",
+        "created_at": "2020-07-09T20:11:00.000Z",
+        "votes": 1100,
+        "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
       }
     }
   }
