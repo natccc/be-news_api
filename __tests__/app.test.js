@@ -38,7 +38,7 @@ describe("/api", () => {
     return request(app)
       .get("/api")
       .expect(200)
-      .then(({ body:{endpoints} }) => {
+      .then(({ body: { endpoints } }) => {
         expect(endpoints).toEqual(require("../endpoints.json"));
       });
   });
@@ -76,6 +76,29 @@ describe("/api/articles/:article_id", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.message).toBe("not found");
+      });
+  });
+});
+
+describe("/api/articles", () => {
+  it("GET 200: responds with an array of article objects", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        console.log(articles)
+        expect(articles.length).toBe(13);
+        articles.forEach((article) => {
+          expect(article.hasOwnProperty("title")).toBe(true);
+          expect(article.hasOwnProperty("topic")).toBe(true);
+          expect(article.hasOwnProperty("author")).toBe(true);
+          expect(article.hasOwnProperty("body")).toBe(true);
+          expect(article.hasOwnProperty("created_at")).toBe(true);
+          expect(article.hasOwnProperty("votes")).toBe(true);
+          expect(article.hasOwnProperty("article_img_url")).toBe(true);
+          expect(article.hasOwnProperty("article_id")).toBe(true);
+          expect(article.hasOwnProperty("comment_count")).toBe(true);
+        });
       });
   });
 });
