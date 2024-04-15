@@ -9,5 +9,4 @@ exports.fetchEndpoints = () => {
   return fs
     .readFile("endpoints.json", "utf8")
     .then((results) => results)
-
 };
