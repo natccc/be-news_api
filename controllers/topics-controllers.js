@@ -1,10 +1,17 @@
-const {fetchTopics} = require("../models/topics-models.js");
+const { fetchTopics, fetchEndpoints } = require("../models/topics-models.js");
 
-const getTopics = (req, res, next) => {
-  return fetchTopics().then((topics) => {
+exports.getTopics = (req, res, next) => {
+  return fetchTopics()
+    .then((topics) => {
       res.status(200).send({ topics });
     })
     .catch(next);
 };
 
-module.exports = {getTopics}
+exports.getEndpoints = (req, res, next) => {
+  return fetchEndpoints()
+    .then((endpoints) => {
+      res.status(200).send(JSON.parse(endpoints));
+    })
+    .catch(next);
+};
