@@ -26,10 +26,10 @@ describe("/api/topics", () => {
         expect(body.topics.length).toBe(3);
         const { topics } = body;
         topics.forEach((topic) => {
-            expect(topic).toMatchObject({
-                slug: expect.any(String),
-                description: expect.any(String)
-            })
+          expect(topic).toMatchObject({
+            slug: expect.any(String),
+            description: expect.any(String),
+          });
         });
       });
   });
@@ -89,10 +89,10 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body: { articles } }) => {
-        expect(articles).toBeSortedBy('created_at',{descending: true})
+        expect(articles).toBeSortedBy("created_at", { descending: true });
         expect(articles.length).toBe(13);
         articles.forEach((article) => {
-        expect(article).toMatchObject({
+          expect(article).toMatchObject({
             title: expect.any(String),
             topic: expect.any(String),
             author: expect.any(String),
@@ -102,46 +102,102 @@ describe("/api/articles", () => {
             article_img_url: expect.any(String),
             article_id: expect.any(Number),
             comment_count: expect.any(String),
-        })
+          });
         });
       });
   });
 });
 
-describe('/api/articles/:article_id/comments', () => {
-    it('GET 200: responds with an array of comments for the given article_id', () => {
-        return request(app)
-        .get('/api/articles/1/comments')
-        .expect(200)
-        .then(({ body: { comments } }) => {
-             expect(comments.length).toBe(11);
-             expect(comments).toBeSortedBy('created_at',{descending: true})
-             comments.forEach((comment) => {
-                 expect(comment).toMatchObject({
-                     comment_id: expect.any(Number),
-                     body: expect.any(String),
-                     votes: expect.any(Number),
-                     author: expect.any(String),
-                     created_at: expect.any(String),
-                     article_id: expect.any(Number),
-                 })
-             });
-    });
-});
-it('GET 404: returns error for non existing id', () => {
+describe("/api/articles/:article_id/comments", () => {
+  it("GET 200: responds with an array of comments for the given article_id", () => {
     return request(app)
-    .get('/api/articles/100/comments')
-    .expect(404)
-    .then(({ body }) => {
-         expect(body.message).toBe("not found");
-     });
-});
-it('GET 400: returns error for bad id', () => {
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments.length).toBe(11);
+        expect(comments).toBeSortedBy("created_at", { descending: true });
+        comments.forEach((comment) => {
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            body: expect.any(String),
+            votes: expect.any(Number),
+            author: expect.any(String),
+            created_at: expect.any(String),
+            article_id: expect.any(Number),
+          });
+        });
+      });
+  });
+  it("GET 404: returns error for non existing id", () => {
     return request(app)
-    .get('/api/articles/dog/comments')
-    .expect(400)
-    .then(({ body }) => {
-         expect(body.message).toBe("bad request");
-     });
-})
+      .get("/api/articles/100/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("not found");
+      });
+  });
+  it("GET 400: returns error for bad id", () => {
+    return request(app)
+      .get("/api/articles/dog/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
+  });
+  it("POST 201: responds with the posted comment", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "butter_bridge",
+        body: "This is a test comment"
+      })
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        console.log(comment)
+        expect(comment).toMatchObject({
+          comment_id: expect.any(Number),
+          body: "This is a test comment",
+          votes: 0,
+          author: "butter_bridge",
+          created_at: expect.any(String),
+          article_id: 1,
+        });
+      });
+  });
+  it("POST 404: returns error for non existing id", () => {
+    return request(app)
+      .post("/api/articles/100/comments")
+      .send({
+        username: "butter_bridge",
+        body: "This is a test comment"
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("not found");
+      });
+  })
+  it('POST 400: returns error for bad id', () => {
+    return request(app)
+     .post("/api/articles/dog/comments")
+     .send({
+        username: "butter_bridge",
+        body: "This is a test comment"
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
+  });
+  it('POST 400: returns error for posting incorrect column names', () => {
+    return request(app)
+     .post("/api/articles/1/comments")
+     .send({
+        banana: "butter_bridge",
+        body: "This is a test comment"
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
+  });
 })
