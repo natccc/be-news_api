@@ -7,7 +7,7 @@ const fs = require('fs')
 beforeEach(()=>seed(data))
 afterAll(()=>db.end())
 
-describe('/api', () => {
+describe('/api/nonexisting', () => {
     it('404: responds with an error for non existing endpoint', () => {
         return request(app)
         .get('/api/nonexisting')
