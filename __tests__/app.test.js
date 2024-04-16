@@ -158,6 +158,22 @@ describe("/api/articles", () => {
         });
       });
   });
+  it("GET 200: Accepts a topic query to filter articles by the topic value specified in the query", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(12);
+      });
+  });
+  it("GET 200: Responds with an empty array if passed in a query of non-existent topic", () => {
+    return request(app)
+      .get("/api/articles?topic=dog")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(0);
+      });
+  });
 });
 describe("/api/articles/:article_id/comments", () => {
   it("GET 200: Responds with an array of comments associated with the article_id", () => {
