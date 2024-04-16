@@ -230,33 +230,56 @@ describe("/api/articles/:article_id", () => {
       .then(({ body }) => {
         expect(body.message).toBe("not found");
       });
-  
-})
-it('PATCH 400: returns error for bad id', () => {
+  });
+  it("PATCH 400: returns error for bad id", () => {
     return request(app)
-     .patch("/api/articles/dog")
-     .send({ inc_votes: 1000 })
-     .expect(400)
-     .then(({ body }) => {
+      .patch("/api/articles/dog")
+      .send({ inc_votes: 1000 })
+      .expect(400)
+      .then(({ body }) => {
         expect(body.message).toBe("bad request");
       });
-});
-it('PATCH 400: returns error for invalid request body', () => {
+  });
+  it("PATCH 400: returns error for invalid request body", () => {
     return request(app)
-     .patch("/api/articles/1")
-     .send({ inc_votes: "banana" })
-     .expect(400)
-     .then(({ body }) => {
+      .patch("/api/articles/1")
+      .send({ inc_votes: "banana" })
+      .expect(400)
+      .then(({ body }) => {
         expect(body.message).toBe("bad request");
       });
-});
-it('PATCH 400: returns error for invalid request body', () => {
+  });
+  it("PATCH 400: returns error for invalid request body", () => {
     return request(app)
-     .patch("/api/articles/1")
-     .send({ banana: 1000 })
-     .expect(400)
-     .then(({ body }) => {
+      .patch("/api/articles/1")
+      .send({ banana: 1000 })
+      .expect(400)
+      .then(({ body }) => {
         expect(body.message).toBe("bad request");
       });
+  });
 });
-})
+
+describe('/api/comments/:comment_id', () => {
+    it('DELETE 204: Delete a comment', () => {
+        return request(app)
+         .delete('/api/comments/1')
+         .expect(204)
+    });
+    it('DELETE 404: returns error for non existing id', () => {
+        return request(app)
+         .delete('/api/comments/100')
+         .expect(404)
+         .then(({ body }) => {
+              expect(body.message).toBe('not found')
+          })
+    });
+    it('DELETE 400: returns error for bad id', () => {
+        return request(app)
+         .delete('/api/comments/dog')
+         .expect(400)
+         .then(({ body }) => {
+              expect(body.message).toBe('bad request')
+          })
+    });
+});
