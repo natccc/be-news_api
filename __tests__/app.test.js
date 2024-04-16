@@ -191,29 +191,29 @@ describe("/api/articles", () => {
         expect(articles).toBeSortedBy("title", { descending: true });
       });
   });
-  it('GET 200: Accepts an order query that orders the articles in asc/desc ', () => {
+  it("GET 200: Accepts an order query that orders the articles in asc/desc ", () => {
     return request(app)
-    .get("/api/articles?order=asc")
-    .expect(200)
-    .then(({ body: { articles } }) => {
-      expect(articles).toBeSortedBy("created_at");
-    });
+      .get("/api/articles?order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at");
+      });
   });
-  it('GET 400: Responds with an error when sort_by query is invalid', () => {
+  it("GET 400: Responds with an error when sort_by query is invalid", () => {
     return request(app)
-    .get("/api/articles?sort_by=dog")
-    .expect(400)
-    .then(({ body }) => {
-       expect(body.message).toBe("invalid query");
-     });
+      .get("/api/articles?sort_by=dog")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("invalid query");
+      });
   });
-  it('GET 400: Responds with an error when order query is invalid', () => {
+  it("GET 400: Responds with an error when order query is invalid", () => {
     return request(app)
-    .get("/api/articles?order=dog")
-    .expect(400)
-    .then(({ body }) => {
-       expect(body.message).toBe("invalid query");
-     });
+      .get("/api/articles?order=dog")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("invalid query");
+      });
   });
 });
 describe("/api/articles/:article_id/comments", () => {
@@ -352,6 +352,29 @@ describe("/api/users", () => {
             avatar_url: expect.any(String),
           });
         });
+      });
+  });
+});
+describe("/api/users/:username", () => {
+  it("GET 200: Responds with a user by username", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body: { user } }) => {
+        expect(user).toMatchObject({
+          username: "butter_bridge",
+          name: "jonny",
+          avatar_url:
+            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+        });
+      });
+  });
+  it("GET 404: Responds with an error when username is non-existent", () => {
+    return request(app)
+      .get("/api/users/dog")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("user not found");
       });
   });
 });
