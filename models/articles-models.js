@@ -6,13 +6,26 @@ exports.fetchArticleById = (article_id) => {
       if (rows.length === 0) {
         return Promise.reject({
           status: 404,
-          message: "not found",
+          message: "article_id not found",
         });
       }
       return rows[0];
     })
 };
 
+exports.checkArticleExists = (article_id) => {
+  return db
+   .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
+   .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          message: "article_id not found",
+        });
+      }
+      return rows[0];
+    })
+};
 exports.fetchArticles = () => {
   return db
     .query(
@@ -27,38 +40,6 @@ exports.fetchArticles = () => {
     });
 };
 
-exports.fetchComments = (article_id) => {
-  return db
-    .query(
-      `SELECT * FROM comments
-  WHERE article_id = $1
-  ORDER BY created_at DESC`,
-      [article_id]
-    )
-    .then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({
-          status: 404,
-          message: "not found",
-        });
-      }
-      return rows;
-    });
-};
-
-exports.insertComment = (article_id, username, body) => {
-  return db
-    .query(
-      `INSERT INTO comments
-  (author, body, article_id)
-  VALUES ($1, $2, $3)
-  RETURNING *`,
-      [username, body, article_id]
-    )
-    .then(({ rows }) => {
-      return rows[0];
-    })
-  };
 
 exports.editArticle = (article_id, inc_votes) => {
   return db
@@ -74,7 +55,7 @@ exports.editArticle = (article_id, inc_votes) => {
       if(rows.length===0){
         return Promise.reject({
           status: 404,
-          message: "not found",
+          message: "article_id not found",
         });
       }
       return rows[0];

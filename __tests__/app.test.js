@@ -7,8 +7,8 @@ const data = require("../db/data/test-data/index");
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
-describe("/api/nonexisting", () => {
-  it("404: responds with an error for non existing endpoint", () => {
+describe("undeclared endpoint", () => {
+  it("404: Responds with an error for non existing endpoint", () => {
     return request(app)
       .get("/api/nonexisting")
       .expect(404)
@@ -17,8 +17,19 @@ describe("/api/nonexisting", () => {
       });
   });
 });
+describe("/api", () => {
+  it("GET 200: Responds with a JSON representation of all the endpoints in this API ", () => {
+    // const expected = JSON.parse(fs.readFileSync("endpoints.json", "utf8"));
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body: { endpoints } }) => {
+        expect(endpoints).toEqual(require("../endpoints.json"));
+      });
+  });
+});
 describe("/api/topics", () => {
-  it("GET 200: responds with an array of topics", () => {
+  it("GET 200: Responds with an array of topics", () => {
     return request(app)
       .get("/api/topics")
       .expect(200)
@@ -34,21 +45,8 @@ describe("/api/topics", () => {
       });
   });
 });
-
-describe("/api", () => {
-  it("GET 200: responds with a JSON representation of all the endpoints in this API ", () => {
-    // const expected = JSON.parse(fs.readFileSync("endpoints.json", "utf8"));
-    return request(app)
-      .get("/api")
-      .expect(200)
-      .then(({ body: { endpoints } }) => {
-        expect(endpoints).toEqual(require("../endpoints.json"));
-      });
-  });
-});
-
 describe("/api/articles/:article_id", () => {
-  it("GET 200: responds with the corresponding article object of the id provided ", () => {
+  it("GET 200: Responds with the an array of articles associated with the article_id ", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
@@ -65,7 +63,7 @@ describe("/api/articles/:article_id", () => {
         });
       });
   });
-  it("GET 400: responds with an error if enters a bad id", () => {
+  it("GET 400: Responds with an error when article_id is of incorrect type", () => {
     return request(app)
       .get("/api/articles/dog")
       .expect(400)
@@ -73,18 +71,17 @@ describe("/api/articles/:article_id", () => {
         expect(body.message).toBe("bad request");
       });
   });
-  it("GET 404: responds with an error if enters a non-existing id", () => {
+  it("GET 404: Responds with an error when article_id is valid but non-existent", () => {
     return request(app)
       .get("/api/articles/100")
       .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe("not found");
+        expect(body.message).toBe("article_id not found");
       });
   });
 });
-
 describe("/api/articles", () => {
-  it("GET 200: responds with an array of article objects", () => {
+  it("GET 200: Responds with an array of article objects", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -107,9 +104,8 @@ describe("/api/articles", () => {
       });
   });
 });
-
 describe("/api/articles/:article_id/comments", () => {
-  it("GET 200: responds with an array of comments for the given article_id", () => {
+  it("GET 200: Responds with an array of comments associated with the article_id", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
@@ -128,15 +124,23 @@ describe("/api/articles/:article_id/comments", () => {
         });
       });
   });
-  it("GET 404: returns error for non existing id", () => {
+  it('GET 200: Responds with an empty array when article_id exist but has no comments', () => {
+    return request(app)
+     .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments.length).toBe(0);
+      });
+  });
+  it("GET 404: Responds with an error when article_id is valid but non-existent", () => {
     return request(app)
       .get("/api/articles/100/comments")
       .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe("not found");
+        expect(body.message).toBe("article_id not found");
       });
   });
-  it("GET 400: returns error for bad id", () => {
+  it("GET 400: Responds with an error when article_id is of invalid type", () => {
     return request(app)
       .get("/api/articles/dog/comments")
       .expect(400)
@@ -144,7 +148,8 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.message).toBe("bad request");
       });
   });
-  it("POST 201: responds with the posted comment", () => {
+  
+  it("POST 201: Responds with the posted comment", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -163,7 +168,7 @@ describe("/api/articles/:article_id/comments", () => {
         });
       });
   });
-  it("POST 404: returns error for non existing id", () => {
+  it("POST 404: Responds with an error when article_id is valid but non-existent", () => {
     return request(app)
       .post("/api/articles/100/comments")
       .send({
@@ -175,7 +180,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.message).toBe("not found");
       });
   });
-  it("POST 400: returns error for bad id", () => {
+  it("POST 400: Responds with an error when article_id is of invalid type", () => {
     return request(app)
       .post("/api/articles/dog/comments")
       .send({
@@ -187,7 +192,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.message).toBe("bad request");
       });
   });
-  it("POST 400: returns error for posting incorrect column names", () => {
+  it("POST 400: Responds with en error when the response body is not of correct format (incorrect column name)", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -200,15 +205,13 @@ describe("/api/articles/:article_id/comments", () => {
       });
   });
 });
-
 describe("/api/articles/:article_id", () => {
-  it("PATCH 200: updates the vote of an article", () => {
+  it("PATCH 200: Updates the vote of the article associated with the article_id", () => {
     return request(app)
       .patch("/api/articles/1")
       .send({ inc_votes: 1000 })
       .expect(200)
       .then(({ body: { article } }) => {
-        console.log(article);
         expect(article).toMatchObject({
           article_id: 1,
           title: "Living in the shadow of a great man",
@@ -222,16 +225,16 @@ describe("/api/articles/:article_id", () => {
         });
       });
   });
-  it("PATCH 404: returns error for non existing id", () => {
+  it("PATCH 404: Responds with an error when article_id is valid but non-existent", () => {
     return request(app)
       .patch("/api/articles/100")
       .send({ inc_votes: 1000 })
       .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe("not found");
+        expect(body.message).toBe("article_id not found");
       });
   });
-  it("PATCH 400: returns error for bad id", () => {
+  it("PATCH 400: Responds with an error when article_id is of invalid type", () => {
     return request(app)
       .patch("/api/articles/dog")
       .send({ inc_votes: 1000 })
@@ -240,7 +243,7 @@ describe("/api/articles/:article_id", () => {
         expect(body.message).toBe("bad request");
       });
   });
-  it("PATCH 400: returns error for invalid request body", () => {
+  it("PATCH 400: Responds with en error when the response body is not of correct format (incorrect value type)", () => {
     return request(app)
       .patch("/api/articles/1")
       .send({ inc_votes: "banana" })
@@ -249,7 +252,7 @@ describe("/api/articles/:article_id", () => {
         expect(body.message).toBe("bad request");
       });
   });
-  it("PATCH 400: returns error for invalid request body", () => {
+  it("PATCH 400: Responds with en error when the response body is not of correct format (incorrect column name)", () => {
     return request(app)
       .patch("/api/articles/1")
       .send({ banana: 1000 })
@@ -259,22 +262,21 @@ describe("/api/articles/:article_id", () => {
       });
   });
 });
-
 describe('/api/comments/:comment_id', () => {
-    it('DELETE 204: Delete a comment', () => {
+    it('DELETE 204: Delete a comment associated with the comment_id)', () => {
         return request(app)
          .delete('/api/comments/1')
          .expect(204)
     });
-    it('DELETE 404: returns error for non existing id', () => {
+    it('DELETE 404: Responds with an error when comment_id is valid but non-existent', () => {
         return request(app)
          .delete('/api/comments/100')
          .expect(404)
          .then(({ body }) => {
-              expect(body.message).toBe('not found')
+              expect(body.message).toBe('comment_id not found')
           })
     });
-    it('DELETE 400: returns error for bad id', () => {
+    it('DELETE 400: Responds with an error when comment_id is of invalid type', () => {
         return request(app)
          .delete('/api/comments/dog')
          .expect(400)
