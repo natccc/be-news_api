@@ -61,7 +61,7 @@
     }
   },
   "POST /api/articles/:article_id/comments": {
-    "description": "add a comment for an article",
+    "description": "adds a comment for an article",
     "queries": [],
     "exampleBody": {
       "useranme": "butter_bridge",
@@ -79,7 +79,7 @@
     }
   },
   "PATCH /api/articles/:article_id": {
-    "description": "update an article",
+    "description": "updates the given article by article_id",
     "queries": [],
     "exampleBody": { "inc_votes": 100 },
     "exampleResponse": {
@@ -96,7 +96,7 @@
     }
   },
   "DELETE /api/articles/:article_id": {
-    "description": "delete an article",
+    "description": "deletes the given article by article_id",
     "queries": [],
     "exampleResponse": ""
   },
@@ -112,5 +112,10 @@
         }
       ]
     }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes the given comment by comment_id",
+    "queries": [],
+    "exampleResponse": ""
   }
 }
