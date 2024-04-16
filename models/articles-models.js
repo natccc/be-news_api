@@ -50,7 +50,6 @@ exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
   if (!validQuery.includes(sort_by) || !validQuery.includes(order)) {
     return Promise.reject({ status: 400, message: "invalid query" });
   }
-
   const queryVals = [];
   let sqlQueryStr = `SELECT articles.*, COUNT(comment_id) AS comment_count
   FROM articles LEFT JOIN comments 
