@@ -2,11 +2,9 @@ const express = require('express')
 const app = express()
 const apiRouter = require('./routes/api-router')
 
-const { getUsers } = require('./controllers/users-controllers')
 
 app.use(express.json())
 app.use('/api', apiRouter)
-app.get('/api/users',getUsers)
 
 //error handling by express
 app.all('*',(req,res,next)=>{
