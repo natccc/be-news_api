@@ -175,6 +175,46 @@ describe("/api/articles", () => {
         expect(articles).toHaveLength(0);
       });
   });
+  it("GET 200: Defaults to be sorted by the created_at date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  it("GET 200: Accepts a sort_by query that sorts the articles by any valid column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("title", { descending: true });
+      });
+  });
+  it('GET 200: Accepts an order query that orders the articles in asc/desc ', () => {
+    return request(app)
+    .get("/api/articles?order=asc")
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(articles).toBeSortedBy("created_at");
+    });
+  });
+  it('GET 400: Responds with an error when sort_by query is invalid', () => {
+    return request(app)
+    .get("/api/articles?sort_by=dog")
+    .expect(400)
+    .then(({ body }) => {
+       expect(body.message).toBe("invalid query");
+     });
+  });
+  it('GET 400: Responds with an error when order query is invalid', () => {
+    return request(app)
+    .get("/api/articles?order=dog")
+    .expect(400)
+    .then(({ body }) => {
+       expect(body.message).toBe("invalid query");
+     });
+  });
 });
 describe("/api/articles/:article_id/comments", () => {
   it("GET 200: Responds with an array of comments associated with the article_id", () => {
