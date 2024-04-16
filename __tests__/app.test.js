@@ -337,7 +337,48 @@ describe("/api/comments/:comment_id", () => {
         expect(body.message).toBe("bad request");
       });
   });
+  it("PATCH 200: Updates a comment associated with the comment_id", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({
+        inc_votes: 100,
+      })
+      .expect(200)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          comment_id: 1,
+          body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+          votes: 116,
+          author: "butter_bridge",
+          created_at: "2020-04-06T12:17:00.000Z",
+          article_id: 9,
+        });
+      });
+  });
+  it("PATCH 404: Responds with an error when comment_id is valid but non-existent", () => {
+    return request(app)
+      .patch("/api/comments/100")
+      .send({
+        inc_votes: 100,
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("comment_id not found");
+      });
+  });
+  it("PATCH 400: Responds with an error when comment_id is of invalid type", () => {
+    return request(app)
+      .patch("/api/comments/dog")
+      .send({
+        inc_votes: 100,
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
+  });
 });
+
 describe("/api/users", () => {
   it("GET 200: Responds with an array of all users ", () => {
     return request(app)
