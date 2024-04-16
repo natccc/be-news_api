@@ -4,7 +4,7 @@ Link: https://be-news-api-h65m.onrender.com
 An API for the purpose of accessing application data programmatically. The intention here is to mimic the building of a real world backend service (such as Reddit) which should provide this information to the front end architecture.
 ### Requirements:
 - [Node.js](https://nodejs.org/en/) version >=6.9.0
-- [Postgres](https://www.postgresql.org/download/) v14.11
+- [Postgres](https://www.postgresql.org/download/) v14.11 <----not sure about this
 
 ## Installation 
 
