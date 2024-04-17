@@ -28,6 +28,28 @@
       ]
     }
   },
+  "POST /api/articles": {
+    "description": "adds a new article",
+    "queries": [],
+    "exampleBody": {
+      "title": "Cats rule the world",
+      "topic": "cats",
+      "author": "butter_bridge",
+      "body": "Cutest animals on earth",
+      "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+    },
+    "exampleResponse": {
+      "title": "Cats rule the world",
+      "topic": "cats",
+      "author": "butter_bridge",
+      "body": "Cutest animals on earth",
+      "created_at": "2024-04-15T20:25:22.313Z",
+      "votes": 0,
+      "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      "article_id": 15,
+      "comment_count": 0
+    }
+  },
   "GET /api/articles/:article_id": {
     "description": "serves an article by the id",
     "queries": [],
@@ -40,7 +62,7 @@
         "created_at": "2020-07-09T20:11:00.000Z",
         "votes": 100,
         "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-        "comment_count": "11"
+        "comment_count": 11
       }
     }
   },

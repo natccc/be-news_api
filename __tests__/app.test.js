@@ -60,7 +60,7 @@ describe("/api/articles/:article_id", () => {
           votes: 100,
           article_img_url:
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          comment_count: "11",
+          comment_count: 11,
         });
       });
   });
@@ -154,7 +154,7 @@ describe("/api/articles", () => {
             votes: expect.any(Number),
             article_img_url: expect.any(String),
             article_id: expect.any(Number),
-            comment_count: expect.any(String),
+            comment_count: expect.any(Number),
           });
         });
       });
@@ -215,7 +215,64 @@ describe("/api/articles", () => {
         expect(body.message).toBe("invalid query");
       });
   });
+  it('POST 201: Posts an article', () => {
+    return request(app)
+     .post("/api/articles")
+     .send({
+       title: "Cats rule the world",
+       topic: "cats",
+       author: "butter_bridge",
+       body: "Cutest animals on earth",
+       article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      })
+     .expect(201)
+     .then(({ body: { article } }) => {
+       expect(article).toMatchObject({
+         title: "Cats rule the world",
+         topic: "cats",
+         author: "butter_bridge",
+         body: "Cutest animals on earth",
+         created_at: expect.any(String),
+         votes: 0,
+         article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+         article_id: expect.any(Number),
+         comment_count: 0,
+       });
+      })
+  });
+  it("POST 400: Responds with an error when the response body is not of correct format (not providing all properties needed)", () => {
+    return request(app)
+     .post("/api/articles")
+     .send({
+       title: "Cats rule the world",
+       topic: "cats",
+       author: "butter_bridge",
+      })
+     .expect(400)
+     .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
+});  
+it("POST 404: Responds with an error when the response body is not of correct format (topic/author does not exist)", () => {
+  return request(app)
+   .post("/api/articles")
+   .send({
+    title: "Cats rule the world",
+    topic: "dog",
+    author: "butter_bridge",
+    body: "Cutest animals on earth",
+    created_at: expect.any(String),
+    votes: 0,
+    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+    article_id: expect.any(Number),
+    comment_count: 0,
+    })
+   .expect(404)
+   .then(({ body }) => {
+      expect(body.message).toBe("not found");
+    });
 });
+})
 describe("/api/articles/:article_id/comments", () => {
   it("GET 200: Responds with an array of comments associated with the article_id", () => {
     return request(app)
@@ -378,7 +435,6 @@ describe("/api/comments/:comment_id", () => {
       });
   });
 });
-
 describe("/api/users", () => {
   it("GET 200: Responds with an array of all users ", () => {
     return request(app)
