@@ -1,11 +1,14 @@
 const db = require("../db/connection.js");
 exports.fetchArticleById = (article_id) => {
   return db
-    .query(`SELECT articles.*, COUNT(comment_id) AS comment_count FROM articles 
+    .query(
+      `SELECT articles.*, COUNT(comment_id)::int AS comment_count FROM articles 
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id
     GROUP BY articles.article_id
-    HAVING articles.article_id = $1`, [article_id])
+    HAVING articles.article_id = $1`,
+      [article_id]
+    )
     .then(({ rows }) => {
       if (rows.length === 0) {
         return Promise.reject({
@@ -30,9 +33,25 @@ exports.checkArticleExists = (article_id) => {
       return rows[0];
     });
 };
-exports.fetchArticles = (topic) => {
-  const queryVals=[]
-  let sqlQueryStr = `SELECT articles.*, COUNT(comment_id) AS comment_count
+exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
+  const validQuery = [
+    "title",
+    "topic",
+    "author",
+    "body",
+    "created_at",
+    "votes",
+    "article_img_url",
+    "article_id",
+    "comment_count",
+    "asc",
+    "desc",
+  ];
+  if (!validQuery.includes(sort_by) || !validQuery.includes(order)) {
+    return Promise.reject({ status: 400, message: "invalid query" });
+  }
+  const queryVals = [];
+  let sqlQueryStr = `SELECT articles.*, COUNT(comment_id)::int AS comment_count
   FROM articles LEFT JOIN comments 
   ON articles.article_id = comments.article_id
   GROUP BY articles.article_id`;
@@ -40,10 +59,10 @@ exports.fetchArticles = (topic) => {
     queryVals.push(topic);
     sqlQueryStr += ` HAVING articles.topic = $1`;
   }
-  sqlQueryStr += ` ORDER BY articles.created_at DESC`;
+  sqlQueryStr += ` ORDER BY ${sort_by} ${order}`;
   return db.query(sqlQueryStr, queryVals).then(({ rows }) => {
     return rows;
-  })
+  });
 };
 
 exports.editArticle = (article_id, inc_votes) => {
@@ -65,3 +84,23 @@ exports.editArticle = (article_id, inc_votes) => {
       return rows[0];
     });
 };
+exports.insertArticle = (author, title, body, topic, article_img_url) => {
+  return db
+    .query(
+      `INSERT INTO articles (author, title, body, topic, article_img_url)
+  VALUES ($1, $2, $3, $4, $5)
+  RETURNING *`,
+      [author, title, body, topic, article_img_url]
+    )
+    .then(({ rows }) => {
+      rows[0].comment_count=0
+      // if (rows.length === 0) {
+      //   return Promise.reject({
+      //     status: 404,
+      //     message: "article_id not found",
+      //   });
+      // }
+      return rows[0];
+    });
+};
+

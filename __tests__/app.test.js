@@ -60,7 +60,7 @@ describe("/api/articles/:article_id", () => {
           votes: 100,
           article_img_url:
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          comment_count: "11",
+          comment_count: 11,
         });
       });
   });
@@ -154,7 +154,7 @@ describe("/api/articles", () => {
             votes: expect.any(Number),
             article_img_url: expect.any(String),
             article_id: expect.any(Number),
-            comment_count: expect.any(String),
+            comment_count: expect.any(Number),
           });
         });
       });
@@ -175,7 +175,104 @@ describe("/api/articles", () => {
         expect(articles).toHaveLength(0);
       });
   });
+  it("GET 200: Defaults to be sorted by the created_at date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  it("GET 200: Accepts a sort_by query that sorts the articles by any valid column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("title", { descending: true });
+      });
+  });
+  it("GET 200: Accepts an order query that orders the articles in asc/desc ", () => {
+    return request(app)
+      .get("/api/articles?order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at");
+      });
+  });
+  it("GET 400: Responds with an error when sort_by query is invalid", () => {
+    return request(app)
+      .get("/api/articles?sort_by=dog")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("invalid query");
+      });
+  });
+  it("GET 400: Responds with an error when order query is invalid", () => {
+    return request(app)
+      .get("/api/articles?order=dog")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("invalid query");
+      });
+  });
+  it('POST 201: Posts an article', () => {
+    return request(app)
+     .post("/api/articles")
+     .send({
+       title: "Cats rule the world",
+       topic: "cats",
+       author: "butter_bridge",
+       body: "Cutest animals on earth",
+       article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      })
+     .expect(201)
+     .then(({ body: { article } }) => {
+       expect(article).toMatchObject({
+         title: "Cats rule the world",
+         topic: "cats",
+         author: "butter_bridge",
+         body: "Cutest animals on earth",
+         created_at: expect.any(String),
+         votes: 0,
+         article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+         article_id: expect.any(Number),
+         comment_count: 0,
+       });
+      })
+  });
+  it("POST 400: Responds with an error when the response body is not of correct format (not providing all properties needed)", () => {
+    return request(app)
+     .post("/api/articles")
+     .send({
+       title: "Cats rule the world",
+       topic: "cats",
+       author: "butter_bridge",
+      })
+     .expect(400)
+     .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
+});  
+it("POST 404: Responds with an error when the response body is not of correct format (topic/author does not exist)", () => {
+  return request(app)
+   .post("/api/articles")
+   .send({
+    title: "Cats rule the world",
+    topic: "dog",
+    author: "butter_bridge",
+    body: "Cutest animals on earth",
+    created_at: expect.any(String),
+    votes: 0,
+    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+    article_id: expect.any(Number),
+    comment_count: 0,
+    })
+   .expect(404)
+   .then(({ body }) => {
+      expect(body.message).toBe("not found");
+    });
 });
+})
 describe("/api/articles/:article_id/comments", () => {
   it("GET 200: Responds with an array of comments associated with the article_id", () => {
     return request(app)
@@ -297,6 +394,46 @@ describe("/api/comments/:comment_id", () => {
         expect(body.message).toBe("bad request");
       });
   });
+  it("PATCH 200: Updates a comment associated with the comment_id", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({
+        inc_votes: 100,
+      })
+      .expect(200)
+      .then(({ body: { comment } }) => {
+        expect(comment).toMatchObject({
+          comment_id: 1,
+          body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+          votes: 116,
+          author: "butter_bridge",
+          created_at: "2020-04-06T12:17:00.000Z",
+          article_id: 9,
+        });
+      });
+  });
+  it("PATCH 404: Responds with an error when comment_id is valid but non-existent", () => {
+    return request(app)
+      .patch("/api/comments/100")
+      .send({
+        inc_votes: 100,
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("comment_id not found");
+      });
+  });
+  it("PATCH 400: Responds with an error when comment_id is of invalid type", () => {
+    return request(app)
+      .patch("/api/comments/dog")
+      .send({
+        inc_votes: 100,
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
+  });
 });
 describe("/api/users", () => {
   it("GET 200: Responds with an array of all users ", () => {
@@ -312,6 +449,29 @@ describe("/api/users", () => {
             avatar_url: expect.any(String),
           });
         });
+      });
+  });
+});
+describe("/api/users/:username", () => {
+  it("GET 200: Responds with a user by username", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body: { user } }) => {
+        expect(user).toMatchObject({
+          username: "butter_bridge",
+          name: "jonny",
+          avatar_url:
+            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+        });
+      });
+  });
+  it("GET 404: Responds with an error when username is non-existent", () => {
+    return request(app)
+      .get("/api/users/dog")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("user not found");
       });
   });
 });

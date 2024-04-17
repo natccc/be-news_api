@@ -2,6 +2,7 @@ const {
   fetchArticleById,
   fetchArticles,
   editArticle,
+  insertArticle,
 } = require("../models/articles-models");
 
 exports.getArticleById = (req, res, next) => {
@@ -14,8 +15,8 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  const {topic} = req.query
-  return fetchArticles(topic)
+  const {topic, sort_by, order} = req.query
+  return fetchArticles(topic, sort_by, order)
     .then((articles) => {
       res.status(200).send({ articles });
     })
@@ -29,4 +30,14 @@ exports.patchArticle= (req, res, next) => {
       res.status(200).send({ article });
     })
     .catch(next);
+}
+exports.postArticle= (req, res, next) => {
+  const {author, title, body, topic, article_img_url} = req.body;
+  return insertArticle(author, title, body, topic, article_img_url)
+    .then((article) => {
+      res.status(201).send({ article });
+    })
+    .catch(err=>{
+      next(err);
+    });
 }
