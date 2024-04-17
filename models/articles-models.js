@@ -65,7 +65,9 @@ exports.fetchArticles = (
   }
 
   const queryVals = [];
-  let sqlQueryStr = `SELECT articles.*, COUNT(comment_id)::int AS comment_count
+  let sqlQueryStr = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes,
+  articles.article_img_url,
+   COUNT(comment_id)::int AS comment_count
   FROM articles LEFT JOIN comments 
   ON articles.article_id = comments.article_id
   GROUP BY articles.article_id`;
@@ -75,6 +77,12 @@ exports.fetchArticles = (
   }
   sqlQueryStr += ` ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${offset}`;
   return db.query(sqlQueryStr, queryVals).then(({ rows }) => {
+    if (rows.length===0) {
+      return Promise.reject({
+          status: 404,
+          message: "not found",
+      });
+    }
     return rows;
   });
 };
@@ -111,7 +119,8 @@ exports.insertArticle = (author, title, body, topic, article_img_url) => {
     });
 };
 exports.removeArticle = (article_id) => {
-  return db.query(`DELETE FROM comments WHERE article_id = $1`, [article_id])
+  return db
+    .query(`DELETE FROM comments WHERE article_id = $1`, [article_id])
     .then(() => {
       return db
         .query(`DELETE FROM articles WHERE article_id =$1 RETURNING *`, [
@@ -124,6 +133,6 @@ exports.removeArticle = (article_id) => {
               message: "article_id not found",
             });
           }
-        })
+        });
     });
 };
