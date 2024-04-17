@@ -300,7 +300,7 @@ describe("/api/articles", () => {
         expect(body.message).toBe("invalid query");
       });
   });
-  it("GET 200: Accepts a p query that specifies the page at which to start", () => {
+  it("GET 200: Accepts a p query that specifies the page at which to start, with the total_count property", () => {
     return request(app)
       .get("/api/articles?p=2")
       .expect(200)
@@ -334,7 +334,6 @@ describe("/api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body: { comments } }) => {
-        expect(comments.length).toBe(11);
         expect(comments).toBeSortedBy("created_at", { descending: true });
         comments.forEach((comment) => {
           expect(comment).toMatchObject({
@@ -428,7 +427,49 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.message).toBe("bad request");
       });
   });
+  it('GET 200: Responds with an array of comments, default to limit 10', () => {
+    return request(app)
+     .get("/api/articles/1/comments")
+     .expect(200)
+     .then(({ body: { comments } }) => {
+      expect(comments.length).toBe(10)
+  });
 });
+it('GET 200: Accepts a query of limit to limit the number of comments', () => {
+  return request(app)
+   .get("/api/articles/1/comments?limit=5")
+   .expect(200)
+   .then(({ body: { comments } }) => {
+      console.log(comments.length)
+      expect(comments.length).toBe(5)
+  });
+});
+it('GET 400: Responds with an error when limit is not a number', () => {
+  return request(app)
+   .get("/api/articles/1/comments?limit=abc")
+   .expect(400)
+   .then(({ body }) => {
+      expect(body.message).toBe("invalid query");
+    });
+});
+it('GET 200: Accepts a query of p that specifies the page at which to start', () => {
+  return request(app)
+   .get("/api/articles/1/comments?p=2")
+   .expect(200)
+   .then(({ body: { comments } }) => {
+      expect(comments.length).toBe(1)
+      expect(comments[0].comment_id).toBe(9)
+  });
+});
+it('GET 400: Responds with an error when p is not a number', () => {
+  return request(app)
+   .get("/api/articles/1/comments?p=abc")
+   .expect(400)
+   .then(({ body }) => {
+      expect(body.message).toBe("invalid query");
+    });
+});
+})
 describe("/api/comments/:comment_id", () => {
   it("DELETE 204: Delete a comment associated with the comment_id)", () => {
     return request(app).delete("/api/comments/1").expect(204);

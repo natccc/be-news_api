@@ -1,11 +1,18 @@
 const db = require('../db/connection')
 
-exports.fetchComments = (article_id) => {
+exports.fetchComments = (article_id,limit="10",p="1") => {
+  if (isNaN(limit) || isNaN(p)) {
+    return Promise.reject({ status: 400, message: "invalid query" });
+  }
+  let offset = 0;
+  if (p) {
+    offset = limit * (p - 1);
+  }
     return db
       .query(
         `SELECT * FROM comments
     WHERE article_id = $1
-    ORDER BY created_at DESC`,
+    ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset} `,
         [article_id]
       )
       .then(({ rows }) => {
