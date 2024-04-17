@@ -44,7 +44,34 @@ describe("/api/topics", () => {
         });
       });
   });
+  it("POST 201: Post a topic and return the newly added topic", () => {
+    return request(app)
+      .post("/api/topics")
+      .send({
+        slug: "new-topic",
+        description: "This is a new topic",
+      })
+      .expect(201)
+      .then(({ body: { topic } }) => {
+        expect(topic).toMatchObject({
+          slug: "new-topic",
+          description: "This is a new topic",
+        });
+      });
+  });
+  it("POST 400: Responds with an error when response body is invalid (invalid key)", () => {
+    return request(app)
+      .post("/api/topics")
+      .send({
+        abc:"new topic",
+        description: "This is a new topic",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
 });
+})
 describe("/api/articles/:article_id", () => {
   it("GET 200: Responds with the an array of articles associated with the article_id ", () => {
     return request(app)
@@ -427,49 +454,48 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.message).toBe("bad request");
       });
   });
-  it('GET 200: Responds with an array of comments, default to limit 10', () => {
+  it("GET 200: Responds with an array of comments, default to limit 10", () => {
     return request(app)
-     .get("/api/articles/1/comments")
-     .expect(200)
-     .then(({ body: { comments } }) => {
-      expect(comments.length).toBe(10)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments.length).toBe(10);
+      });
+  });
+  it("GET 200: Accepts a query of limit to limit the number of comments", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=5")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments.length).toBe(5);
+      });
+  });
+  it("GET 400: Responds with an error when limit is not a number", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=abc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("invalid query");
+      });
+  });
+  it("GET 200: Accepts a query of p that specifies the page at which to start", () => {
+    return request(app)
+      .get("/api/articles/1/comments?p=2")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments.length).toBe(1);
+        expect(comments[0].comment_id).toBe(9);
+      });
+  });
+  it("GET 400: Responds with an error when p is not a number", () => {
+    return request(app)
+      .get("/api/articles/1/comments?p=abc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("invalid query");
+      });
   });
 });
-it('GET 200: Accepts a query of limit to limit the number of comments', () => {
-  return request(app)
-   .get("/api/articles/1/comments?limit=5")
-   .expect(200)
-   .then(({ body: { comments } }) => {
-      console.log(comments.length)
-      expect(comments.length).toBe(5)
-  });
-});
-it('GET 400: Responds with an error when limit is not a number', () => {
-  return request(app)
-   .get("/api/articles/1/comments?limit=abc")
-   .expect(400)
-   .then(({ body }) => {
-      expect(body.message).toBe("invalid query");
-    });
-});
-it('GET 200: Accepts a query of p that specifies the page at which to start', () => {
-  return request(app)
-   .get("/api/articles/1/comments?p=2")
-   .expect(200)
-   .then(({ body: { comments } }) => {
-      expect(comments.length).toBe(1)
-      expect(comments[0].comment_id).toBe(9)
-  });
-});
-it('GET 400: Responds with an error when p is not a number', () => {
-  return request(app)
-   .get("/api/articles/1/comments?p=abc")
-   .expect(400)
-   .then(({ body }) => {
-      expect(body.message).toBe("invalid query");
-    });
-});
-})
 describe("/api/comments/:comment_id", () => {
   it("DELETE 204: Delete a comment associated with the comment_id)", () => {
     return request(app).delete("/api/comments/1").expect(204);
