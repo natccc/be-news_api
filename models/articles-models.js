@@ -33,7 +33,13 @@ exports.checkArticleExists = (article_id) => {
       return rows[0];
     });
 };
-exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
+exports.fetchArticles = (
+  topic,
+  sort_by = "created_at",
+  order = "desc",
+  limit = "10",
+  p = "1"
+) => {
   const validQuery = [
     "title",
     "topic",
@@ -47,9 +53,17 @@ exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
     "asc",
     "desc",
   ];
+  if (isNaN(limit) || isNaN(p)) {
+    return Promise.reject({ status: 400, message: "invalid query" });
+  }
   if (!validQuery.includes(sort_by) || !validQuery.includes(order)) {
     return Promise.reject({ status: 400, message: "invalid query" });
   }
+  let offset = 0;
+  if (p) {
+    offset = limit * (p - 1);
+  }
+
   const queryVals = [];
   let sqlQueryStr = `SELECT articles.*, COUNT(comment_id)::int AS comment_count
   FROM articles LEFT JOIN comments 
@@ -59,12 +73,24 @@ exports.fetchArticles = (topic, sort_by = "created_at", order = "desc") => {
     queryVals.push(topic);
     sqlQueryStr += ` HAVING articles.topic = $1`;
   }
-  sqlQueryStr += ` ORDER BY ${sort_by} ${order}`;
-  return db.query(sqlQueryStr, queryVals).then(({ rows }) => {
-    return rows;
-  });
+  sqlQueryStr += ` ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${offset}`;
+  return db
+    .query(sqlQueryStr, queryVals)
+    .then(({ rows }) => {
+      return rows;
+    })
 };
 
+/*p1, offset 0
+p2, offset 10 (limit)
+p3, offset 20 limit *2 (p-1)
+p4, offset 30
+p5, offset 40
+p6, offset 50
+p7, offset 60
+
+
+*/
 exports.editArticle = (article_id, inc_votes) => {
   return db
     .query(
@@ -93,14 +119,7 @@ exports.insertArticle = (author, title, body, topic, article_img_url) => {
       [author, title, body, topic, article_img_url]
     )
     .then(({ rows }) => {
-      rows[0].comment_count=0
-      // if (rows.length === 0) {
-      //   return Promise.reject({
-      //     status: 404,
-      //     message: "article_id not found",
-      //   });
-      // }
+      rows[0].comment_count = 0;
       return rows[0];
     });
 };
-

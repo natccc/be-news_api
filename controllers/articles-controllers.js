@@ -15,10 +15,11 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  const {topic, sort_by, order} = req.query
-  return fetchArticles(topic, sort_by, order)
+  const {topic, sort_by, order, limit, p} = req.query
+  return fetchArticles(topic, sort_by, order, limit, p)
     .then((articles) => {
-      res.status(200).send({ articles });
+      const total_count = articles.length
+      res.status(200).send({ articles, total_count });
     })
     .catch(next);
 };

@@ -143,7 +143,6 @@ describe("/api/articles", () => {
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(articles).toBeSortedBy("created_at", { descending: true });
-        expect(articles.length).toBe(13);
         articles.forEach((article) => {
           expect(article).toMatchObject({
             title: expect.any(String),
@@ -164,7 +163,9 @@ describe("/api/articles", () => {
       .get("/api/articles?topic=mitch")
       .expect(200)
       .then(({ body: { articles } }) => {
-        expect(articles.length).toBe(12);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
       });
   });
   it("GET 200: Responds with an empty array if passed in a query of non-existent topic", () => {
@@ -215,64 +216,118 @@ describe("/api/articles", () => {
         expect(body.message).toBe("invalid query");
       });
   });
-  it('POST 201: Posts an article', () => {
+  it("POST 201: Posts an article", () => {
     return request(app)
-     .post("/api/articles")
-     .send({
-       title: "Cats rule the world",
-       topic: "cats",
-       author: "butter_bridge",
-       body: "Cutest animals on earth",
-       article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      .post("/api/articles")
+      .send({
+        title: "Cats rule the world",
+        topic: "cats",
+        author: "butter_bridge",
+        body: "Cutest animals on earth",
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
       })
-     .expect(201)
-     .then(({ body: { article } }) => {
-       expect(article).toMatchObject({
-         title: "Cats rule the world",
-         topic: "cats",
-         author: "butter_bridge",
-         body: "Cutest animals on earth",
-         created_at: expect.any(String),
-         votes: 0,
-         article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-         article_id: expect.any(Number),
-         comment_count: 0,
-       });
-      })
+      .expect(201)
+      .then(({ body: { article } }) => {
+        expect(article).toMatchObject({
+          title: "Cats rule the world",
+          topic: "cats",
+          author: "butter_bridge",
+          body: "Cutest animals on earth",
+          created_at: expect.any(String),
+          votes: 0,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          article_id: expect.any(Number),
+          comment_count: 0,
+        });
+      });
   });
   it("POST 400: Responds with an error when the response body is not of correct format (not providing all properties needed)", () => {
     return request(app)
-     .post("/api/articles")
-     .send({
-       title: "Cats rule the world",
-       topic: "cats",
-       author: "butter_bridge",
+      .post("/api/articles")
+      .send({
+        title: "Cats rule the world",
+        topic: "cats",
+        author: "butter_bridge",
       })
-     .expect(400)
-     .then(({ body }) => {
+      .expect(400)
+      .then(({ body }) => {
         expect(body.message).toBe("bad request");
       });
-});  
-it("POST 404: Responds with an error when the response body is not of correct format (topic/author does not exist)", () => {
-  return request(app)
-   .post("/api/articles")
-   .send({
-    title: "Cats rule the world",
-    topic: "dog",
-    author: "butter_bridge",
-    body: "Cutest animals on earth",
-    created_at: expect.any(String),
-    votes: 0,
-    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-    article_id: expect.any(Number),
-    comment_count: 0,
-    })
-   .expect(404)
-   .then(({ body }) => {
-      expect(body.message).toBe("not found");
-    });
+  });
+  it("POST 404: Responds with an error when the response body is not of correct format (topic/author does not exist)", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        title: "Cats rule the world",
+        topic: "dog",
+        author: "butter_bridge",
+        body: "Cutest animals on earth",
+        created_at: expect.any(String),
+        votes: 0,
+        article_img_url:
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        article_id: expect.any(Number),
+        comment_count: 0,
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("not found");
+      });
+  });
+  it("GET 200: Limit the number of responses, default to 10", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(10);
+      });
+  });
+  it("GET 200: Accept a query of limit to limit the number of responses", () => {
+    return request(app)
+      .get("/api/articles?limit=5")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(5);
+      });
+  });
+  it("GET 400: Responds with an error when limit is not a number", () => {
+    return request(app)
+      .get("/api/articles?limit=abc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("invalid query");
+      });
+  });
+  it("GET 200: Accepts a p query that specifies the page at which to start", () => {
+    return request(app)
+      .get("/api/articles?p=2")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.total_count).toBe(3);
+        expect(body.articles[0].created_at).toBe("2020-04-17T01:08:00.000Z");
+      });
+  });
+  it("GET 200: Accepts multiple queries", () => {
+    return request(app)
+      .get("/api/articles?limit=5&p=2&sort_by=article_id")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles[0].article_id).toBe(8);
+        expect(body.total_count).toBe(5);
+      });
+  });
+  it("GET 400: Responds with an error when p is not a number", () => {
+    return request(app)
+      .get("/api/articles?p=abc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("invalid query");
+      });
+  });
 });
-})
+
 describe("/api/articles/:article_id/comments", () => {
   it("GET 200: Responds with an array of comments associated with the article_id", () => {
     return request(app)
