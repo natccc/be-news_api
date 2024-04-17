@@ -162,6 +162,27 @@ describe("/api/articles/:article_id", () => {
         expect(body.message).toBe("bad request");
       });
   });
+  it('DELETE 204: Deletes an article based on an id, and its respective comments', () => {
+    return request(app)
+     .delete("/api/articles/1")
+     .expect(204)
+  });
+  it('DELETE 404: Responds with an error when article_id is valid but non-existent', () => {
+    return request(app)
+     .delete("/api/articles/100")
+     .expect(404)
+     .then(({ body }) => {
+        expect(body.message).toBe("article_id not found");
+      });
+  });
+  it('DELETE 400: Responds with an error when article_id is of incorrect type', () => {
+    return request(app)
+     .delete("/api/articles/dog")
+     .expect(400)
+     .then(({ body }) => {
+        expect(body.message).toBe("bad request");
+      });
+  });
 });
 describe("/api/articles", () => {
   it("GET 200: Responds with an array of article objects", () => {
