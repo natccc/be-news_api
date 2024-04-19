@@ -352,7 +352,7 @@ describe("/api/articles", () => {
       .expect(200)
       .then(({ body }) => {
         expect(body.total_count).toBe(3);
-        expect(body.articles[0].created_at).toBe("2020-04-17T01:08:00.000Z");
+        expect(body.articles[0].article_id).toBe(8);
       });
   });
   it("GET 200: Accepts multiple queries", () => {
