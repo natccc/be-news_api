@@ -28,5 +28,7 @@ jobs:
       uses: actions/checkout@v4.1.1
     - name: Install dependencies
       run: npm ci
+    - name: setup db
+      run: npm setup-dbs
     - name: Run integration tests
       run: npm test app
