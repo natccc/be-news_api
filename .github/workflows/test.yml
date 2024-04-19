@@ -8,8 +8,8 @@ on:
 
 jobs:
   greeting:
-  runs-on: ubuntu-latest
-  steps:
+    runs-on: ubuntu-latest
+    steps:
     - name: Say Hello
       run: echo 'Hello World'
     
