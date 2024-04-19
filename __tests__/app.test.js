@@ -189,6 +189,7 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(13)
         expect(articles).toBeSortedBy("created_at", { descending: true });
         articles.forEach((article) => {
           expect(article).toMatchObject({
@@ -322,9 +323,9 @@ describe("/api/articles", () => {
         expect(body.message).toBe("not found");
       });
   });
-  it("GET 200: Limit the number of responses, default to 10", () => {
+  it("GET 200: Limit the number of responses if passed in page query without limit, default to 10", () => {
     return request(app)
-      .get("/api/articles")
+      .get("/api/articles?p=1")
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(articles.length).toBe(10);
@@ -473,12 +474,12 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.message).toBe("bad request");
       });
   });
-  it("GET 200: Responds with an array of comments, default to limit 10", () => {
+  it("GET 200: Responds with an array of comments", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body: { comments } }) => {
-        expect(comments.length).toBe(10);
+        expect(comments.length).toBe(11);
       });
   });
   it("GET 200: Accepts a query of limit to limit the number of comments", () => {

@@ -1,11 +1,24 @@
 const db = require('../db/connection')
 
-exports.fetchComments = (article_id,limit="10",p="1") => {
-  if (isNaN(limit) || isNaN(p)) {
+exports.fetchComments = (article_id,limit="all",p) => {
+  if(p){
+    if(isNaN(p)){
+      return Promise.reject({ status: 400, message: "invalid query" })
+    }
+  }
+  if ((isNaN(limit) && limit !== "all")){
     return Promise.reject({ status: 400, message: "invalid query" });
   }
+  if (p){
+    if(limit==="all") {
+    limit = 10;
+  }
+  }  
   let offset = 0;
-  if (p) {
+  if (limit!=="all") {
+    if(!p){
+      p =1
+    }
     offset = limit * (p - 1);
   }
     return db

@@ -37,8 +37,8 @@ exports.fetchArticles = (
   topic,
   sort_by = "created_at",
   order = "desc",
-  limit = "10",
-  p = "1"
+  limit = "all",
+  p 
 ) => {
   const validQuery = [
     "title",
@@ -53,14 +53,29 @@ exports.fetchArticles = (
     "asc",
     "desc",
   ];
-  if (isNaN(limit) || isNaN(p)) {
+
+  if(p){
+    if(isNaN(p)){
+      return Promise.reject({ status: 400, message: "invalid query" })
+    }
+  }
+  if ((isNaN(limit) && limit !== "all")){
     return Promise.reject({ status: 400, message: "invalid query" });
   }
   if (!validQuery.includes(sort_by) || !validQuery.includes(order)) {
     return Promise.reject({ status: 400, message: "invalid query" });
   }
+
+  if (p){
+    if(limit==="all") {
+    limit = 10;
+  }
+  }  
   let offset = 0;
-  if (p) {
+  if (limit!=="all") {
+    if(!p){
+      p =1
+    }
     offset = limit * (p - 1);
   }
 
@@ -77,14 +92,14 @@ exports.fetchArticles = (
   }
   sqlQueryStr += ` ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${offset}`;
   return db.query(sqlQueryStr, queryVals).then(({ rows }) => {
-    if (rows.length===0) {
+    if (rows.length === 0) {
       return Promise.reject({
-          status: 404,
-          message: "not found",
+        status: 404,
+        message: "not found",
       });
     }
     return rows;
-  });
+  })
 };
 exports.editArticle = (article_id, inc_votes) => {
   return db
