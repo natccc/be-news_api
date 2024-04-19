@@ -1,9 +1,9 @@
 name: Test
 
-on:
-  pull_request:
+on: 
+  push:
     branches: 
-      - main
+    - main
   workflow_dispatch:
 
 jobs:
