@@ -120,13 +120,13 @@
     "description": "adds a comment for an article",
     "queries": [],
     "exampleBody": {
-      "useranme": "butter_bridge",
-      "body": "This is a test comment"
+      "username": "butter_bridge",
+      "body": "Hello world"
     },
     "exampleResponse": {
       "comment": {
         "comment_id": 19,
-        "body": "This is a test comment",
+        "body": "Hello world",
         "article_id": 1,
         "author": "butter_bridge",
         "votes": 0,
