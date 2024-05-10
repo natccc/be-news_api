@@ -215,6 +215,17 @@ describe("/api/articles", () => {
         });
       });
   });
+  it("GET 200: Accepts an author query to filter articles by the topic value specified in the query", () => {
+    return request(app)
+      .get("/api/articles?author=butter_bridge")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        articles.forEach((article) => {
+          expect(article.author).toBe("butter_bridge");
+        });
+      });
+  });
+
   it("GET 404: Responds with an error if passed in a query of non-existent topic", () => {
     return request(app)
       .get("/api/articles?topic=dog")
@@ -474,6 +485,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.message).toBe("bad request");
       });
   });
+
   it("GET 200: Responds with an array of comments", () => {
     return request(app)
       .get("/api/articles/1/comments")

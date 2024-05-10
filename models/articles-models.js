@@ -38,7 +38,8 @@ exports.fetchArticles = (
   sort_by = "created_at",
   order = "desc",
   limit = "all",
-  p 
+  p,
+  author
 ) => {
   const validQuery = [
     "title",
@@ -90,6 +91,16 @@ exports.fetchArticles = (
     queryVals.push(topic);
     sqlQueryStr += ` HAVING articles.topic = $1`;
   }
+  if(author){
+    if(queryVals.length){
+      sqlQueryStr += ' AND'
+    }
+    else{
+      sqlQueryStr += ' HAVING'
+    }
+    queryVals.push(author)
+    sqlQueryStr += ` articles.author = $${queryVals.length}`
+  }
   sqlQueryStr += ` ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${offset}`;
   return db.query(sqlQueryStr, queryVals).then(({ rows }) => {
     if (rows.length === 0) {
@@ -98,6 +109,7 @@ exports.fetchArticles = (
         message: "not found",
       });
     }
+    console.log(rows)
     return rows;
   })
 };
