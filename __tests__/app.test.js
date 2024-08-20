@@ -1,8 +1,8 @@
-const app = require("../app");
+const app = require("../src/app");
 const request = require("supertest");
-const db = require("../db/connection");
-const seed = require("../db/seeds/seed");
-const data = require("../db/data/test-data/index");
+const db = require("../src/db/connection");
+const seed = require("../src/db/seeds/seed");
+const data = require("../src/db/data/test-data/index");
 
 beforeEach(() => seed(data));
 afterAll(() => db.end());
@@ -160,11 +160,11 @@ describe("/api/articles/:article_id", () => {
   });
   it("DELETE 204: Deletes an article based on an id, and its respective comments", () => {
     return request(app)
-    .delete("/api/articles/1")
-    .expect(204)
-    .then(({ body }) => {
-      expect(body).toEqual({})
-    })
+      .delete("/api/articles/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
   });
   it("DELETE 404: Responds with an error when article_id is valid but non-existent", () => {
     return request(app)
@@ -189,7 +189,7 @@ describe("/api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body: { articles } }) => {
-        expect(articles).toHaveLength(13)
+        expect(articles).toHaveLength(13);
         expect(articles).toBeSortedBy("created_at", { descending: true });
         articles.forEach((article) => {
           expect(article).toMatchObject({
