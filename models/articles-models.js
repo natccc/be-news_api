@@ -109,7 +109,6 @@ exports.fetchArticles = (
         message: "not found",
       });
     }
-    console.log(rows)
     return rows;
   })
 };

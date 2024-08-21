@@ -1,14 +1,24 @@
-const router= require('express').Router()
-const{getArticleById, getArticles, patchArticle, postArticle, deleteArticle}=require('../controllers/articles-controllers')
-const { getComments, postComment} = require('../controllers/comments-controllers')
+const router = require("express").Router();
+const {
+  getArticleById,
+  getArticles,
+  patchArticle,
+  postArticle,
+  deleteArticle,
+} = require("../controllers/articles-controllers");
+const {
+  getComments,
+  postComment,
+} = require("../controllers/comments-controllers");
 
-router.get('/', getArticles)
-router.post('/', postArticle)
-router.get('/:article_id', getArticleById)
-router.patch('/:article_id', patchArticle)
-router.delete('/:article_id', deleteArticle)
-router.get('/:article_id/comments', getComments)
-router.post('/:article_id/comments', postComment)
+router.route("/").get(getArticles).post(postArticle);
 
+router
+  .route("/:article_id")
+  .get(getArticleById)
+  .patch(patchArticle)
+  .delete(deleteArticle);
 
-module.exports = router
+router.route("/:article_id/comments").get(getComments).post(postComment);
+
+module.exports = router;
